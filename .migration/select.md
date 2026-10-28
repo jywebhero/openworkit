@@ -1,0 +1,34 @@
+# select
+
+2026-10-28 · transformation engine (legacy `new-york` style: no `base-*` registry pair to replay onto), project classes kept. Verdict: migrated, but this is the component whose *behaviour* moved most — Base UI's Select is a different model and one call site had to change semantics, not just syntax.
+
+## Changed
+
+- [src/renderer/src/components/ui/select.tsx:1](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L1) — `@radix-ui/react-select` → `@base-ui/react/select`; `import * as React` dropped. `Root` and `Value` re-exports kept ([select.tsx:5-6](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L5)).
+- [select.tsx:8-23](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L8) — `Trigger` classes unchanged (incl. `disabled:opacity-50`, which still works because Base UI's trigger is a real `<button>` with `role="combobox"` + `aria-haspopup="listbox"`). The child `<SelectPrimitive.Icon asChild><ChevronDown /></SelectPrimitive.Icon>` became `<SelectPrimitive.Icon render={<ChevronDown />} />` ([select.tsx:20](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L20)) — the icon now carries the lucide classes instead of the wrapper passing them through Slot.
+- [select.tsx:25-63](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L25) — `Content` → `Portal > Positioner > Popup`, with the radix `position="popper"` prop deleted and its look reproduced by explicit defaults: `side='bottom'`, `sideOffset=6`, `align='start'`, `alignOffset=0`, and **`alignItemWithTrigger=false`** (Base UI's default `true` overlays the popup on the trigger like a native `<select>`, which is not this app's look). The Positioner gets `isolate z-50`; the trigger-width rule became `w-(--anchor-width)` replacing `w-[var(--radix-select-trigger-width)]`.
+- [select.tsx:51](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L51) — `overflow-hidden` → `overflow-x-hidden overflow-y-auto` and `max-h-80` kept. Reason: the wrapper does not render Base UI's overflow affordances, so the Popup itself must scroll or long option lists are clipped. `SelectPrimitive.Viewport` → `SelectPrimitive.List` ([select.tsx:58](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L58)), still holding the `p-1` padding.
+- Animation gating renamed to `data-open:` ([select.tsx:52](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L52)); there was no exit class in the original, so none was invented.
+- [select.tsx:65-84](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/components/ui/select.tsx#L65) — `Item`: attribute renames only (`data-[highlighted]:` → `data-highlighted:`, `data-[disabled]:` → `data-disabled:`); `ItemText` and `ItemIndicator` survive with the same names and the `Check` still sits in the `absolute right-2` slot. Verified against the package source: `Select.Item` renders `role="option"` (`select/item/SelectItem.js:127`) and derives its own selected state internally (`SelectItem.js:54`), and `Select.Trigger` renders `role="combobox"` + `aria-haspopup="listbox"` (`select/trigger/SelectTrigger.js:124-126`) — so the a11y tree is intact and the smoke assertions could target `combobox` / `listbox` roles. The selected row is marked by the ItemIndicator, not by a class the wrapper styles.
+- Consumer, the only one: [pages/settings/preferences.tsx:26-33](file:///Users/jackyin/Workspace/openworkit/src/renderer/src/pages/settings/preferences.tsx#L26) — the 技能安装目录 Select. Two real edits, not mechanical:
+  - `items={settings.skillDirs.map((dir) => ({ value: dir.id, label: dir.label }))}` was added, because Base UI renders the trigger's label from the Root's `items` collection rather than from a `SelectValue` child.
+  - `onValueChange={(value) => void update({ installDirId: String(value ?? '') })}` — the callback now receives `unknown` (the item value type) and `null` when cleared, so it is coerced to `string`.
+- Leftover scan clean: `grep -n "radix-ui\|@radix-ui\|asChild\|data-\[state\|Viewport\|position=" src/renderer/src/components/ui/select.tsx` → no matches.
+
+## Left alone
+
+- `components/ui/dropdown-menu.tsx` — `Menu`, migrated in its own report; Base UI keeps Menu and Select anatomies separate, so no shared Positioner helper was extracted (three similar lines beat a premature abstraction).
+- `components/ui/sonner.tsx`, `badge.tsx`, `input.tsx` — not radix.
+- Base UI does expose `Select.Separator`, `Select.Group`, `Select.GroupLabel`, `Select.Label`, `Select.ScrollUpArrow` and `Select.ScrollDownArrow` (see the `@base-ui/react/select` part list), but this wrapper never exported the radix equivalents of those, so they were not ported either — no API surface was lost, and nothing was silently dropped.
+
+## Behavior changes
+
+- **Every `Select` now needs `items` (or a `Value` child) or the trigger renders empty.** That is the sharp edge of this migration: a future author copying the old radix pattern will get a blank combobox with no error.
+- `onValueChange` receives `null` on clear and an untyped value otherwise; the project's single consumer coerces, but other future consumers must not assume `string`.
+- `alignItemWithTrigger=false` was chosen to preserve the old popper look. With the default (`true`) the popup would cover the trigger and the `w-(--anchor-width)` rule would not apply — flagging the choice because it is a deliberate deviation from idiomatic Base UI.
+- Radix showed chevrons (`ScrollUpButton`/`ScrollDownButton`) when the list overflowed; this wrapper does not render Base UI's `ScrollUpArrow`/`ScrollDownArrow` equivalents, so overflow now shows a real scrollbar inside the 320px-tall Popup instead. Different, not worse, but visible.
+- Typeahead + `Home`/`End`/`PageUp`/`PageDown` are Base UI's implementation; the smoke assertion originally targeted `getByRole('option', …)` with a name regex that matched nothing because temporary-HOME directory labels are paths (`~/.agents/skills`, `~/.codex/skills`), not agent names — the test now reads all option texts and clicks the first one differing from the trigger. Nothing about the component changed there; the *labels* did not match the assumption.
+
+## Verify by hand
+
+Thirty seconds: 设置 → 偏好 → 技能安装目录. Click the trigger — the popup must appear just below, left-aligned, exactly as wide as the trigger; the current value carries the `Check`; arrow keys move the `bg-accent` highlight and Enter commits; the trigger label must update immediately and the setting must survive an app restart. Then add a second long directory path so the list overflows `max-h-80` and confirm it scrolls (no clipped options, no chevrons) — that is the regression this migration is most likely to hide.

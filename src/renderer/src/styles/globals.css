@@ -1,0 +1,198 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, 'Cascadia Code', 'Roboto Mono',
+    monospace;
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #fafafa;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #27272a;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #dc2626;
+  --success: #16a34a;
+  --border: #e9e9ec;
+  --input: #e4e4e7;
+  --ring: #a1a1aa;
+  --sidebar: #f2f2f3;
+  --sidebar-foreground: #52525b;
+  --sidebar-accent: rgba(24, 24, 27, 0.06);
+  --sidebar-border: #e7e7e9;
+  --card-pad: 1.25rem;
+  --row-pad: 0.85rem;
+}
+
+.dark {
+  --background: #0b0b0c;
+  --foreground: #f4f4f5;
+  --card: #151517;
+  --card-foreground: #f4f4f5;
+  --popover: #19191c;
+  --popover-foreground: #f4f4f5;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #1f1f23;
+  --secondary-foreground: #f4f4f5;
+  --muted: #1c1c20;
+  --muted-foreground: #9b9ba5;
+  --accent: #232327;
+  --accent-foreground: #f4f4f5;
+  --destructive: #f87171;
+  --success: #4ade80;
+  --border: #26262b;
+  --input: #2c2c32;
+  --ring: #52525b;
+  --sidebar: #0f0f11;
+  --sidebar-foreground: #a6a6b0;
+  --sidebar-accent: rgba(255, 255, 255, 0.07);
+  --sidebar-border: #1f1f24;
+}
+
+:root[data-compact='true'] {
+  --card-pad: 0.9rem;
+  --row-pad: 0.55rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    overscroll-behavior: none;
+    user-select: none;
+    cursor: default;
+  }
+
+  input,
+  textarea,
+  pre,
+  code,
+  .selectable {
+    user-select: text;
+  }
+
+  input:focus,
+  textarea:focus,
+  button:focus {
+    outline: none;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  }
+}
+
+@layer utilities {
+  .app-drag {
+    -webkit-app-region: drag;
+  }
+
+  .app-no-drag {
+    -webkit-app-region: no-drag;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--foreground) 14%, transparent);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--foreground) 26%, transparent);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.skill-markdown {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 2;
+}
+
+.icon-tile {
+  background-color: var(--tile-bg);
+  color: var(--tile-fg);
+}
+
+.dark .icon-tile {
+  background-color: color-mix(in oklab, var(--tile-bg) 16%, #17171a);
+  color: color-mix(in oklab, var(--tile-fg) 72%, #ffffff);
+}

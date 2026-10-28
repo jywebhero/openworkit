@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>OpenWorkit Logo A — Orbital Ring &amp; Nodes</title>
+  <!-- rounded black background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="225" ry="225" fill="#000000"/>
+  <!-- connectors -->
+  <g stroke="#FFFFFF" stroke-width="16" stroke-linecap="round">
+    <line x1="512" y1="340" x2="512" y2="256"/>
+    <line x1="363" y1="598" x2="292" y2="639"/>
+    <line x1="661" y1="598" x2="732" y2="639"/>
+  </g>
+  <!-- hub ring -->
+  <circle cx="512" cy="512" r="140" fill="none" stroke="#FFFFFF" stroke-width="64"/>
+  <!-- agent nodes -->
+  <g fill="#FFFFFF">
+    <circle cx="512" cy="202" r="56"/>
+    <circle cx="243.5" cy="667" r="56"/>
+    <circle cx="780.5" cy="667" r="56"/>
+  </g>
+</svg>
