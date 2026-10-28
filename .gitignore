@@ -6,9 +6,6 @@
 # production
 /build
 
-# screenshots
-/screenshots/
-
 # misc
 .DS_Store
 
